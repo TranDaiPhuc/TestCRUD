@@ -37,6 +37,10 @@ namespace CRUD
             GridView1.DataSource = data;
             GridView1.DataKeyNames = keyname;
             GridView1.DataBind();
+            GridView1.HeaderRow.BackColor = System.Drawing.Color.Black;
+            GridView1.HeaderRow.ForeColor = System.Drawing.Color.White;
+            GridView1.HeaderRow.Cells[0].BackColor = System.Drawing.Color.White;
+            GridView1.HeaderRow.Cells[0].ForeColor = System.Drawing.Color.Black;
         }
 
         private void ClearData()
@@ -52,6 +56,7 @@ namespace CRUD
                 row.BackColor = System.Drawing.Color.White;
                 row.ForeColor = System.Drawing.Color.Black;
             }
+
             using (sqlsconnection = new SqlConnection(sqls))
             {
                 sqlsconnection.Open();
@@ -127,10 +132,9 @@ namespace CRUD
                         " IF @@ROWCOUNT = 0 " +
                         " INSERT INTO [Schedule] (PO, Model_Name, Model_Number, Article, Order_Quantity, Building, Planned_Date, CFD, PD, Country, Onhand) " +
                         " VALUES ( '" + TextBox1.Text + "', '" + TextBox2.Text + "', '" + TextBox3.Text + "', '" + TextBox4.Text + "', '" + TextBox5.Text + "', '" + TextBox6.Text + "', '" + TextBox7.Text + "', '" + TextBox8.Text + "', '" + TextBox9.Text + "', '" + TextBox10.Text + "', '" + TextBox11.Text + "') ", sqlsconnection);
-                    sqldata = new SqlDataAdapter(sqlscommand);
-                    inputdata.Reset();
-                    sqldata.Fill(inputdata);
+                    sqlscommand.ExecuteNonQuery();
                     sqlsconnection.Close();
+                    ClientScript.RegisterStartupScript(this.GetType(), "", "PO '" + TextBox1.Text + "' was edited successfully", false);
                 }
                     
             }
@@ -166,24 +170,17 @@ namespace CRUD
                         " IF @@ROWCOUNT = 0 " +
                         " INSERT INTO [Schedule] (PO, Model_Name, Model_Number, Article, Order_Quantity, Building, Planned_Date, CFD, PD, Country, Onhand) " +
                         " VALUES ( '" + TextBox1.Text + "', '" + TextBox2.Text + "', '" + TextBox3.Text + "', '" + TextBox4.Text + "', '" + TextBox5.Text + "', '" + TextBox6.Text + "', '" + TextBox7.Text + "', '" + TextBox8.Text + "', '" + TextBox9.Text + "', '" + TextBox10.Text + "', '" + TextBox11.Text + "') ", sqlsconnection);
-                    sqldata = new SqlDataAdapter(sqlscommand);
-                    inputdata.Reset();
-                    sqldata.Fill(inputdata);
+                    sqlscommand.ExecuteNonQuery();
                     sqlsconnection.Close();
+                    ClientScript.RegisterStartupScript(this.GetType(), "", "PO '" + GridView1.SelectedRow.Cells[1].Text + "' was edited successfully", false);
                 }
                 else
                 {
-                    sqlsconnection.Open();
-                    inputdata = new DataTable();
-                    sqlscommand = new SqlCommand("INSERT INTO [Schedule] (PO, Model_Name, Model_Number, Article, Order_Quantity, Building, Planned_Date, CFD, PD, Country, Onhand) " +
-                        " VALUES ( '" + TextBox1.Text + "', '" + TextBox2.Text + "', '" + TextBox3.Text + "', '" + TextBox4.Text + "', '" + TextBox5.Text + "', '" + TextBox6.Text + "', '" + TextBox7.Text + "', '" + TextBox8.Text + "', '" + TextBox9.Text + "', '" + TextBox10.Text + "', '" + TextBox11.Text + "') ", sqlsconnection);
-                    sqldata = new SqlDataAdapter(sqlscommand);
-                    inputdata.Reset();
-                    sqldata.Fill(inputdata);
-                    sqlsconnection.Close();
+                    ClientScript.RegisterStartupScript(this.GetType(), "", "No PO selected", false);
                 }
 
             }
+            GridView1.SelectedIndex = -1;
             LoadSQL();
         }
 
@@ -205,11 +202,13 @@ namespace CRUD
                     ClientScript.RegisterStartupScript(this.GetType(), "", "No PO selected", false);
                 }
             }
+            GridView1.SelectedIndex = -1;
             ClearData();
         }
 
         protected void Button4_Click(object sender, EventArgs e)
         {
+            GridView1.SelectedIndex = -1;
             ClearData();
         }
     }
