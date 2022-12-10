@@ -134,7 +134,7 @@ namespace CRUD
                         " VALUES ( '" + TextBox1.Text + "', '" + TextBox2.Text + "', '" + TextBox3.Text + "', '" + TextBox4.Text + "', '" + TextBox5.Text + "', '" + TextBox6.Text + "', '" + TextBox7.Text + "', '" + TextBox8.Text + "', '" + TextBox9.Text + "', '" + TextBox10.Text + "', '" + TextBox11.Text + "') ", sqlsconnection);
                     sqlscommand.ExecuteNonQuery();
                     sqlsconnection.Close();
-                    ClientScript.RegisterStartupScript(this.GetType(), "", "PO '" + TextBox1.Text + "' was edited successfully", false);
+                    ClientScript.RegisterStartupScript(this.GetType(), "", ". . . PO '" + TextBox1.Text + "' was edited successfully", false);
                 }
                     
             }
@@ -172,11 +172,11 @@ namespace CRUD
                         " VALUES ( '" + TextBox1.Text + "', '" + TextBox2.Text + "', '" + TextBox3.Text + "', '" + TextBox4.Text + "', '" + TextBox5.Text + "', '" + TextBox6.Text + "', '" + TextBox7.Text + "', '" + TextBox8.Text + "', '" + TextBox9.Text + "', '" + TextBox10.Text + "', '" + TextBox11.Text + "') ", sqlsconnection);
                     sqlscommand.ExecuteNonQuery();
                     sqlsconnection.Close();
-                    ClientScript.RegisterStartupScript(this.GetType(), "", "PO '" + GridView1.SelectedRow.Cells[1].Text + "' was edited successfully", false);
+                    ClientScript.RegisterStartupScript(this.GetType(), "", ". . . PO '" + GridView1.SelectedRow.Cells[1].Text + "' was edited successfully", false);
                 }
                 else
                 {
-                    ClientScript.RegisterStartupScript(this.GetType(), "", "No PO selected", false);
+                    ClientScript.RegisterStartupScript(this.GetType(), "", ". . . No PO selected", false);
                 }
 
             }
@@ -195,11 +195,11 @@ namespace CRUD
                     sqlscommand = new SqlCommand(" Delete from Schedule Where PO = '" + GridView1.SelectedRow.Cells[1].Text + "' ", sqlsconnection);
                     sqlscommand.ExecuteNonQuery();
                     sqlsconnection.Close();
-                    ClientScript.RegisterStartupScript(this.GetType(),"","PO '" + GridView1.SelectedRow.Cells[1].Text + "' was deleted successfully", false);
+                    ClientScript.RegisterStartupScript(this.GetType(),"", ". . . PO '" + GridView1.SelectedRow.Cells[1].Text + "' was deleted successfully", false);
                 }
                 else
                 {
-                    ClientScript.RegisterStartupScript(this.GetType(), "", "No PO selected", false);
+                    ClientScript.RegisterStartupScript(this.GetType(), "", ". . . No PO selected", false);
                 }
             }
             GridView1.SelectedIndex = -1;
