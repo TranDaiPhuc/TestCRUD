@@ -4,9 +4,9 @@
 
     <table cellpadding="2" cellspacing="3" style="width: 100%; border-style: solid; border-width: 1px; font-family: 'Segoe UI'; font-size: 16px; font-weight: bold; line-height: 32px; vertical-align: middle; text-align: left; text-indent: 10px; border-collapse: separate; height: 100%;">
         <tr>
-            <td style="width: 180px">&nbsp;</td>
-            <td style="width: 180px">&nbsp;</td>
-            <td>&nbsp;</td>
+            <td style="width: 180px; height: 62px;"></td>
+            <td style="width: 180px; height: 62px"></td>
+            <td style="height: 62px"></td>
         </tr>
         <tr>
             <td style="width: 180px">&nbsp;</td>

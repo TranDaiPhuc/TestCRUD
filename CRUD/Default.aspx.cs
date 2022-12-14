@@ -221,7 +221,7 @@ namespace CRUD
             {
                 sqlsconnection.Open();
                 sqlscommand = new SqlCommand(" Delete from Schedule Where PO = @PO ", sqlsconnection);
-                sqlscommand.Parameters.AddWithValue("@PO", data.Rows[e.RowIndex]["PO"]);
+                sqlscommand.Parameters.AddWithValue("@PO", data2.Rows[e.RowIndex]["PO"]);
                 sqlscommand.ExecuteNonQuery();
                 sqlsconnection.Close();
                 ClientScript.RegisterStartupScript(this.GetType(), "", ". . . PO " + data2.Rows[e.RowIndex]["PO"] + " was deleted successfully", false);
