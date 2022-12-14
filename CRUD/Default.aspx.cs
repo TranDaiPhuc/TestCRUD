@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
+using System.Drawing;
 using System.Linq;
 using System.Web;
 using System.Web.UI;
@@ -17,8 +18,9 @@ namespace CRUD
         SqlCommand sqlscommand;
         SqlDataAdapter sqldata;
         DataTable data = new DataTable();
+        DataTable data2 = new DataTable();
         DataTable inputdata = new DataTable();
-        string[] keyname = { "PO", "Model_Name", "Model_Number", "Article", "Quantity", "Lean", "Planned_Date", "CRD", "PD", "Country", "Onhand" };
+        string[] keyname = { };
 
         private void LoadSQL()
         {
@@ -34,182 +36,239 @@ namespace CRUD
                 sqldata.Fill(data);
                 
             }
-            GridView1.DataSource = data;
-            GridView1.DataKeyNames = keyname;
-            GridView1.DataBind();
-            GridView1.HeaderRow.BackColor = System.Drawing.Color.Black;
-            GridView1.HeaderRow.ForeColor = System.Drawing.Color.White;
-            GridView1.HeaderRow.Cells[0].BackColor = System.Drawing.Color.White;
-            GridView1.HeaderRow.Cells[0].ForeColor = System.Drawing.Color.Black;
+            gvMain.DataSource = data;
+            gvMain.DataKeyNames = keyname;
+            gvMain.DataBind();
+            gvMain.HeaderRow.BackColor = System.Drawing.Color.Blue;
+            gvMain.HeaderRow.ForeColor = System.Drawing.Color.White;
+            gvMain.HeaderRow.Cells[0].BackColor = System.Drawing.Color.White;
+            gvMain.HeaderRow.Cells[0].ForeColor = System.Drawing.Color.Black;
+            ViewState["data"] = data;
+            LoadColor();
         }
 
-        private void ClearData()
+        private void LoadColor ()
         {
-            LoadSQL();
-            LoadInfo(" ");
+            List<int> list = (List<int>)ViewState["Checked"];
+            for (int i = 0; i < gvMain.Rows.Count; i++)
+            {
+                //ClientScript.RegisterStartupScript(this.GetType(), "myalert", "alert('" + i + (gvMain.PageIndex * gvMain.PageSize) + "');", true);
+                if (list[i + (gvMain.PageIndex * gvMain.PageSize)] == 1)
+                {
+                    gvMain.Rows[i].BackColor = System.Drawing.Color.Gold;
+                }
+                else
+                {
+                    gvMain.Rows[i].BackColor = System.Drawing.Color.White;
+                }
+                gvMain.Rows[i].Cells[0].BackColor = System.Drawing.Color.White;
+                gvMain.Rows[i].Cells[0].ForeColor = System.Drawing.Color.Indigo;
+            };
         }
 
-        private void LoadInfo(string PO)
+        private void ResetCheckedViewState()
         {
-            foreach (GridViewRow row in GridView1.Rows)
-            {
-                row.BackColor = System.Drawing.Color.White;
-                row.ForeColor = System.Drawing.Color.Black;
-            }
+            List<int> list = new List<int>();
 
-            using (sqlsconnection = new SqlConnection(sqls))
+            for (int i = 0; i < 20; i++)
             {
-                sqlsconnection.Open();
-                inputdata = new DataTable();
-                sqlscommand = new SqlCommand(" Select PO, Model_Name, Model_Number,Article, Order_Quantity as Quantity, Building as Lean, Planned_Date, CFD as CRD, PD, Country, Onhand " +
-                    " From Schedule " +
-                    " Where PO = '" + PO + "'", sqlsconnection);
-                sqldata = new SqlDataAdapter(sqlscommand);
-                inputdata.Reset();
-                sqldata.Fill(inputdata);
-                sqlsconnection.Close();
+                list.Add(0);
             }
+            ViewState["Checked"] = list;
+        }
 
-            if (inputdata.Rows.Count > 0)
-            {
-                TextBox1.Text = inputdata.Rows[0]["PO"].ToString();
-                TextBox2.Text = inputdata.Rows[0]["Model_Name"].ToString();
-                TextBox3.Text = inputdata.Rows[0]["Model_Number"].ToString();
-                TextBox4.Text = inputdata.Rows[0]["Article"].ToString();
-                TextBox5.Text = inputdata.Rows[0]["Quantity"].ToString();
-                TextBox6.Text = inputdata.Rows[0]["Lean"].ToString();
-                TextBox7.Text = inputdata.Rows[0]["Planned_Date"].ToString();
-                TextBox8.Text = inputdata.Rows[0]["CRD"].ToString();
-                TextBox9.Text = inputdata.Rows[0]["PD"].ToString();
-                TextBox10.Text = inputdata.Rows[0]["Country"].ToString();
-                TextBox11.Text = inputdata.Rows[0]["Onhand"].ToString();
+        private void ShiftCheckedViewState(int index)
+        {
+            List<int> list = (List<int>)ViewState["Checked"];
 
-                GridView1.SelectedRow.BackColor = System.Drawing.Color.Blue;
-                GridView1.SelectedRow.ForeColor = System.Drawing.Color.White;
-            }
-            else
-            {
-                TextBox1.Text = "";
-                TextBox2.Text = "";
-                TextBox3.Text = "";
-                TextBox4.Text = "";
-                TextBox5.Text = "";
-                TextBox6.Text = "";
-                TextBox7.Text = "";
-                TextBox8.Text = "";
-                TextBox9.Text = "";
-                TextBox10.Text = "";
-                TextBox11.Text = "";
-            }
+            list.RemoveAt(index);
+            list.Add(0);
+
+            ViewState["Checked"] = list;
         }
 
         protected void Page_Load(object sender, EventArgs e)
         {
+            if (!IsPostBack)
+            {
+                ResetCheckedViewState();
+                LoadSQL();
+            }
+        }
+
+        protected void gvMain_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            List<int> list = (List<int>)ViewState["Checked"];
+            if (list[gvMain.SelectedIndex + (gvMain.PageIndex * gvMain.PageSize)] == 0)
+            {
+                list[gvMain.SelectedIndex + (gvMain.PageIndex * gvMain.PageSize)] = 1;
+            }
+            else
+            {
+                list[gvMain.SelectedIndex + (gvMain.PageIndex * gvMain.PageSize)] = 0;
+            }
+
+            //string output = string.Join(" | ", list);
+            //ClientScript.RegisterStartupScript(this.GetType(), "myalert", "alert('" + string + "');", true);
+            ViewState["Checked"] = list;
+            gvMain.SelectedIndex = -1;
             LoadSQL();
         }
 
-        protected void Button1_Click(object sender, EventArgs e)
+        protected void gvMain_RowEditing(object sender, GridViewEditEventArgs e)
         {
+            gvMain.EditIndex = e.NewEditIndex;
+            LoadSQL();
+        }
+
+        protected void gvMain_RowUpdating(object sender, GridViewUpdateEventArgs e)
+        {
+            data2 = (DataTable)ViewState["data"];
+            GridViewRow row = gvMain.Rows[e.RowIndex];
+            string PO = (row.Cells[1].Controls[0] as TextBox).Text;
+            string Model_Name = (row.Cells[2].Controls[0] as TextBox).Text;
+            string Model_Number = (row.Cells[3].Controls[0] as TextBox).Text;
+            string Article = (row.Cells[4].Controls[0] as TextBox).Text;
+            string Quantity = (row.Cells[5].Controls[0] as TextBox).Text;
+            string Lean = (row.Cells[6].Controls[0] as TextBox).Text;
+            string Planned_Date = (row.Cells[7].Controls[0] as TextBox).Text;
+            string CRD = (row.Cells[8].Controls[0] as TextBox).Text;
+            string PD = (row.Cells[9].Controls[0] as TextBox).Text;
+            string Country = (row.Cells[10].Controls[0] as TextBox).Text;
+            string Onhand = (row.Cells[11].Controls[0] as TextBox).Text;
+
             using (sqlsconnection = new SqlConnection(sqls))
             {
-                if (!string.IsNullOrWhiteSpace(TextBox1.Text))
+                if (!string.IsNullOrWhiteSpace(PO))
                 {
                     sqlsconnection.Open();
                     inputdata = new DataTable();
                     sqlscommand = new SqlCommand(" Update Schedule " +
-                        " Set PO = '" + TextBox1.Text + "', " +
-                        " Model_Name = '" + TextBox2.Text + "', " +
-                        " Model_Number = '" + TextBox3.Text + "', " +
-                        " Article = '" + TextBox4.Text + "', " +
-                        " Order_Quantity = '" + TextBox5.Text + "', " +
-                        "Building = '" + TextBox6.Text + "', " +
-                        "Planned_Date = '" + TextBox7.Text + "', " +
-                        "CFD = '" + TextBox8.Text + "', " +
-                        "PD = '" + TextBox9.Text + "', " +
-                        "Country = '" + TextBox10.Text + "', " +
-                        "Onhand = '" + TextBox11.Text + "' " +
-                        " Where PO = '" + TextBox1.Text + "' " +
+                        " Set PO = @PO, " +
+                        " Model_Name = @Model_Name, " +
+                        " Model_Number = @Model_Number, " +
+                        " Article = @Article, " +
+                        " Order_Quantity = @Quantity, " +
+                        " Building = @Lean, " +
+                        " Planned_Date = @Planned_Date, " +
+                        " CFD = @CRD, " +
+                        " PD = @PD, " +
+                        " Country = @Country, " +
+                        " Onhand = @Onhand " +
+                        " Where PO = @OldPO " +
                         " IF @@ROWCOUNT = 0 " +
                         " INSERT INTO [Schedule] (PO, Model_Name, Model_Number, Article, Order_Quantity, Building, Planned_Date, CFD, PD, Country, Onhand) " +
-                        " VALUES ( '" + TextBox1.Text + "', '" + TextBox2.Text + "', '" + TextBox3.Text + "', '" + TextBox4.Text + "', '" + TextBox5.Text + "', '" + TextBox6.Text + "', '" + TextBox7.Text + "', '" + TextBox8.Text + "', '" + TextBox9.Text + "', '" + TextBox10.Text + "', '" + TextBox11.Text + "') ", sqlsconnection);
+                        " VALUES ( @PO, @Model_Name, @Model_Number, @Article, @Quantity, @Lean, @Planned_Date, @CRD, @PD, @Country, @Onhand ) ", sqlsconnection);
+                    sqlscommand.Parameters.AddWithValue("@PO", PO);
+                    sqlscommand.Parameters.AddWithValue("@Model_Name", Model_Name);
+                    sqlscommand.Parameters.AddWithValue("@Model_Number", Model_Number);
+                    sqlscommand.Parameters.AddWithValue("@Article", Article);
+                    sqlscommand.Parameters.AddWithValue("@Quantity", Quantity);
+                    sqlscommand.Parameters.AddWithValue("@Lean", Lean);
+                    sqlscommand.Parameters.AddWithValue("@Planned_Date", Planned_Date);
+                    sqlscommand.Parameters.AddWithValue("@CRD", CRD);
+                    sqlscommand.Parameters.AddWithValue("@PD", PD);
+                    sqlscommand.Parameters.AddWithValue("@Country", Country);
+                    sqlscommand.Parameters.AddWithValue("@Onhand", Onhand);
+                    sqlscommand.Parameters.AddWithValue("@OldPO", data2.Rows[e.RowIndex + (gvMain.PageIndex * gvMain.PageSize)]["PO"]);
                     sqlscommand.ExecuteNonQuery();
                     sqlsconnection.Close();
-                    ClientScript.RegisterStartupScript(this.GetType(), "", ". . . PO '" + TextBox1.Text + "' was edited successfully", false);
-                }
-                    
-            }
-            LoadSQL();
-        }
-
-        protected void GridView1_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            LoadInfo(GridView1.SelectedRow.Cells[1].Text);
-        }
-
-        protected void Button2_Click(object sender, EventArgs e)
-        {
-            using (sqlsconnection = new SqlConnection(sqls))
-            {
-                if (GridView1.SelectedRow != null)
-                {
-                    sqlsconnection.Open();
-                    inputdata = new DataTable();
-                    sqlscommand = new SqlCommand(" Update Schedule " +
-                        " Set PO = '" + TextBox1.Text + "', " +
-                        " Model_Name = '" + TextBox2.Text + "', " +
-                        " Model_Number = '" + TextBox3.Text + "', " +
-                        " Article = '" + TextBox4.Text + "', " +
-                        " Order_Quantity = '" + TextBox5.Text + "', " +
-                        "Building = '" + TextBox6.Text + "', " +
-                        "Planned_Date = '" + TextBox7.Text + "', " +
-                        "CFD = '" + TextBox8.Text + "', " +
-                        "PD = '" + TextBox9.Text + "', " +
-                        "Country = '" + TextBox10.Text + "', " +
-                        "Onhand = '" + TextBox11.Text + "' " +
-                        " Where PO = '" + GridView1.SelectedRow.Cells[1].Text + "' " +
-                        " IF @@ROWCOUNT = 0 " +
-                        " INSERT INTO [Schedule] (PO, Model_Name, Model_Number, Article, Order_Quantity, Building, Planned_Date, CFD, PD, Country, Onhand) " +
-                        " VALUES ( '" + TextBox1.Text + "', '" + TextBox2.Text + "', '" + TextBox3.Text + "', '" + TextBox4.Text + "', '" + TextBox5.Text + "', '" + TextBox6.Text + "', '" + TextBox7.Text + "', '" + TextBox8.Text + "', '" + TextBox9.Text + "', '" + TextBox10.Text + "', '" + TextBox11.Text + "') ", sqlsconnection);
-                    sqlscommand.ExecuteNonQuery();
-                    sqlsconnection.Close();
-                    ClientScript.RegisterStartupScript(this.GetType(), "", ". . . PO '" + GridView1.SelectedRow.Cells[1].Text + "' was edited successfully", false);
+                    //ClientScript.RegisterStartupScript(this.GetType(), "myalert", "alert('" + ViewState["OldPO"] + "');", true);
+                    ClientScript.RegisterStartupScript(this.GetType(), "", ". . . PO was " + PO + " edited successfully", false);
                 }
                 else
                 {
-                    ClientScript.RegisterStartupScript(this.GetType(), "", ". . . No PO selected", false);
+                    ClientScript.RegisterStartupScript(this.GetType(), "", ". . . No PO inputted", false);
                 }
-
             }
-            GridView1.SelectedIndex = -1;
+            
+            if (data2.Rows[e.RowIndex + (gvMain.PageIndex * gvMain.PageSize)]["PO"].ToString() != PO)
+            {
+                ResetCheckedViewState();
+            }
+            data2.Reset();
+            gvMain.SelectedIndex = -1;
+            gvMain.EditIndex = -1;
             LoadSQL();
         }
 
-        protected void Button3_Click(object sender, EventArgs e)
+        protected void gvMain_RowDataBound(object sender, GridViewRowEventArgs e)
         {
-            using (sqlsconnection = new SqlConnection(sqls))
-            {
-                if (GridView1.SelectedRow != null)
-                {
-                    sqlsconnection.Open();
-                    inputdata = new DataTable();
-                    sqlscommand = new SqlCommand(" Delete from Schedule Where PO = '" + GridView1.SelectedRow.Cells[1].Text + "' ", sqlsconnection);
-                    sqlscommand.ExecuteNonQuery();
-                    sqlsconnection.Close();
-                    ClientScript.RegisterStartupScript(this.GetType(),"", ". . . PO '" + GridView1.SelectedRow.Cells[1].Text + "' was deleted successfully", false);
-                }
-                else
-                {
-                    ClientScript.RegisterStartupScript(this.GetType(), "", ". . . No PO selected", false);
-                }
-            }
-            GridView1.SelectedIndex = -1;
-            ClearData();
+            //nothing for now
         }
 
-        protected void Button4_Click(object sender, EventArgs e)
+        protected void gvMain_RowCancelingEdit(object sender, GridViewCancelEditEventArgs e)
         {
-            GridView1.SelectedIndex = -1;
-            ClearData();
+            gvMain.SelectedIndex = -1;
+            gvMain.EditIndex = -1;
+            LoadSQL();
+        }
+
+        protected void gvMain_RowDeleting(object sender, GridViewDeleteEventArgs e)
+        {
+            data2 = (DataTable)ViewState["data"];
+            //ClientScript.RegisterStartupScript(this.GetType(), "myalert", "alert('" + data2.Rows[e.RowIndex]["PO"] + "');", true);
+            using (sqlsconnection = new SqlConnection(sqls))
+            {
+                sqlsconnection.Open();
+                sqlscommand = new SqlCommand(" Delete from Schedule Where PO = @PO ", sqlsconnection);
+                sqlscommand.Parameters.AddWithValue("@PO", data.Rows[e.RowIndex]["PO"]);
+                sqlscommand.ExecuteNonQuery();
+                sqlsconnection.Close();
+                ClientScript.RegisterStartupScript(this.GetType(), "", ". . . PO " + data2.Rows[e.RowIndex]["PO"] + " was deleted successfully", false);
+            }
+            data2.Reset();
+            ShiftCheckedViewState(e.RowIndex + gvMain.PageIndex);
+            LoadSQL();
+        }
+
+        protected void gvMain_PageIndexChanged(object sender, EventArgs e)
+        {
+            //do nothing for now
+        }
+
+        protected void gvMain_PageIndexChanging(object sender, GridViewPageEventArgs e)
+        {
+            gvMain.PageIndex = e.NewPageIndex;
+            LoadSQL();
+        }
+
+        protected void btnDelete_Click(object sender, EventArgs e)
+        {
+            List<int> list = (List<int>)ViewState["Checked"];
+            data2 = (DataTable)ViewState["data"];
+            for (int i = 0; i < data2.Rows.Count; i++)
+            {
+                if (list[i] == 1)
+                {
+                    using (sqlsconnection = new SqlConnection(sqls))
+                    {
+                        sqlsconnection.Open();
+                        inputdata = new DataTable();
+                        sqlscommand = new SqlCommand(" Delete from Schedule Where PO = @PO ", sqlsconnection);
+                        sqlscommand.Parameters.AddWithValue("@PO", data2.Rows[i]["PO"]);
+                        sqlscommand.ExecuteNonQuery();
+                        sqlsconnection.Close();
+                        ClientScript.RegisterStartupScript(this.GetType(), "", ". . . Selected PO was deleted successfully", false);
+                    }
+                }
+            }
+            data2.Reset();
+            ResetCheckedViewState();
+            LoadSQL();
+        }
+
+        protected void btnInverse_Click(object sender, EventArgs e)
+        {
+            List<int> list = (List<int>)ViewState["Checked"];
+
+            for (int i = 0; i < list.Count; i++)
+            {
+                list[i] = Math.Abs(list[i] - 1);
+            }
+
+            ViewState["Checked"] = list;
+            LoadSQL();
         }
     }
 }
