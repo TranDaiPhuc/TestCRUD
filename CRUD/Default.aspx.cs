@@ -43,7 +43,7 @@ namespace CRUD
             gvMain.HeaderRow.ForeColor = System.Drawing.Color.White;
             gvMain.HeaderRow.Cells[0].BackColor = System.Drawing.Color.White;
             gvMain.HeaderRow.Cells[0].ForeColor = System.Drawing.Color.Black;
-            ViewState["data"] = data;
+            ViewState["Data"] = data;
             LoadColor();
         }
 
@@ -91,6 +91,8 @@ namespace CRUD
         {
             if (!IsPostBack)
             {
+                ViewState["Edit"] = -1;
+                ViewState["Page"] = 0;
                 ResetCheckedViewState();
                 LoadSQL();
             }
@@ -118,12 +120,15 @@ namespace CRUD
         protected void gvMain_RowEditing(object sender, GridViewEditEventArgs e)
         {
             gvMain.EditIndex = e.NewEditIndex;
+            ViewState["Edit"] = gvMain.EditIndex;
+            ViewState["Page"] = gvMain.PageIndex;
+            //ClientScript.RegisterStartupScript(this.GetType(), "myalert", "alert('" + gvMain.EditIndex + "');", true);
             LoadSQL();
         }
 
         protected void gvMain_RowUpdating(object sender, GridViewUpdateEventArgs e)
         {
-            data2 = (DataTable)ViewState["data"];
+            data2 = (DataTable)ViewState["Data"];
             GridViewRow row = gvMain.Rows[e.RowIndex];
             string PO = (row.Cells[1].Controls[0] as TextBox).Text;
             string Model_Name = (row.Cells[2].Controls[0] as TextBox).Text;
@@ -187,6 +192,8 @@ namespace CRUD
                 ResetCheckedViewState();
             }
             data2.Reset();
+            ViewState["Edit"] = -1;
+            ViewState["Page"] = 0;
             gvMain.SelectedIndex = -1;
             gvMain.EditIndex = -1;
             LoadSQL();
@@ -199,6 +206,8 @@ namespace CRUD
 
         protected void gvMain_RowCancelingEdit(object sender, GridViewCancelEditEventArgs e)
         {
+            ViewState["Edit"] = -1;
+            ViewState["Page"] = 0;
             gvMain.SelectedIndex = -1;
             gvMain.EditIndex = -1;
             LoadSQL();
@@ -206,7 +215,7 @@ namespace CRUD
 
         protected void gvMain_RowDeleting(object sender, GridViewDeleteEventArgs e)
         {
-            data2 = (DataTable)ViewState["data"];
+            data2 = (DataTable)ViewState["Data"];
             //ClientScript.RegisterStartupScript(this.GetType(), "myalert", "alert('" + data2.Rows[e.RowIndex]["PO"] + "');", true);
             using (sqlsconnection = new SqlConnection(sqls))
             {
@@ -230,13 +239,21 @@ namespace CRUD
         protected void gvMain_PageIndexChanging(object sender, GridViewPageEventArgs e)
         {
             gvMain.PageIndex = e.NewPageIndex;
+            if (gvMain.PageIndex != (Int32)ViewState["Page"])
+            {
+                gvMain.EditIndex = -1;
+            }
+            else
+            {
+                gvMain.EditIndex = (Int32)ViewState["Edit"];
+            }
             LoadSQL();
         }
 
         protected void btnDelete_Click(object sender, EventArgs e)
         {
             List<int> list = (List<int>)ViewState["Checked"];
-            data2 = (DataTable)ViewState["data"];
+            data2 = (DataTable)ViewState["Data"];
             for (int i = 0; i < data2.Rows.Count; i++)
             {
                 if (list[i] == 1)
