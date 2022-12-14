@@ -270,5 +270,11 @@ namespace CRUD
             ViewState["Checked"] = list;
             LoadSQL();
         }
+
+        protected void btnClear_Click(object sender, EventArgs e)
+        {
+            ResetCheckedViewState();
+            LoadSQL();
+        }
     }
 }
