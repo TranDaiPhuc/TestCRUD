@@ -52,7 +52,6 @@ namespace CRUD
             List<int> list = (List<int>)ViewState["Checked"];
             for (int i = 0; i < gvMain.Rows.Count; i++)
             {
-                //ClientScript.RegisterStartupScript(this.GetType(), "myalert", "alert('" + i + (gvMain.PageIndex * gvMain.PageSize) + "');", true);
                 if (list[i + (gvMain.PageIndex * gvMain.PageSize)] == 1)
                 {
                     gvMain.Rows[i].BackColor = System.Drawing.Color.Gold;
@@ -130,17 +129,18 @@ namespace CRUD
         {
             data2 = (DataTable)ViewState["Data"];
             GridViewRow row = gvMain.Rows[e.RowIndex];
-            string PO = (row.Cells[1].Controls[0] as TextBox).Text;
-            string Model_Name = (row.Cells[2].Controls[0] as TextBox).Text;
-            string Model_Number = (row.Cells[3].Controls[0] as TextBox).Text;
-            string Article = (row.Cells[4].Controls[0] as TextBox).Text;
-            string Quantity = (row.Cells[5].Controls[0] as TextBox).Text;
-            string Lean = (row.Cells[6].Controls[0] as TextBox).Text;
-            string Planned_Date = (row.Cells[7].Controls[0] as TextBox).Text;
-            string CRD = (row.Cells[8].Controls[0] as TextBox).Text;
-            string PD = (row.Cells[9].Controls[0] as TextBox).Text;
-            string Country = (row.Cells[10].Controls[0] as TextBox).Text;
-            string Onhand = (row.Cells[11].Controls[0] as TextBox).Text;
+            //ClientScript.RegisterStartupScript(this.GetType(), "myalert", "alert('" + gvMain.Cells[1].Controls[2] + "');", true);
+            string PO = (row.Cells[1].Controls[1] as TextBox).Text;
+            string Model_Name = (row.Cells[2].Controls[1] as TextBox).Text;
+            string Model_Number = (row.Cells[3].Controls[1] as TextBox).Text;
+            string Article = (row.Cells[4].Controls[1] as TextBox).Text;
+            string Quantity = (row.Cells[5].Controls[1] as TextBox).Text;
+            string Lean = (row.Cells[6].Controls[1] as TextBox).Text;
+            string Planned_Date = (row.Cells[7].Controls[1] as TextBox).Text;
+            string CRD = (row.Cells[8].Controls[1] as TextBox).Text;
+            string PD = (row.Cells[9].Controls[1] as TextBox).Text;
+            string Country = (row.Cells[10].Controls[1] as TextBox).Text;
+            string Onhand = (row.Cells[11].Controls[1] as TextBox).Text;
 
             using (sqlsconnection = new SqlConnection(sqls))
             {
@@ -290,8 +290,79 @@ namespace CRUD
 
         protected void btnClear_Click(object sender, EventArgs e)
         {
+            ViewState["Edit"] = -1;
+            ViewState["Page"] = 0;
+            gvMain.SelectedIndex = -1;
+            gvMain.EditIndex = -1;
             ResetCheckedViewState();
             LoadSQL();
+        }
+
+        protected void gvMain_RowCommand(object sender, GridViewCommandEventArgs e)
+        {
+            if (e.CommandName == "Add")
+            {
+                GridViewRow row = gvMain.FooterRow;
+                string PO = (row.Cells[1].Controls[1] as TextBox).Text;
+                string Model_Name = (row.Cells[2].Controls[1] as TextBox).Text;
+                string Model_Number = (row.Cells[3].Controls[1] as TextBox).Text;
+                string Article = (row.Cells[4].Controls[1] as TextBox).Text;
+                string Quantity = (row.Cells[5].Controls[1] as TextBox).Text;
+                string Lean = (row.Cells[6].Controls[1] as TextBox).Text;
+                string Planned_Date = (row.Cells[7].Controls[1] as TextBox).Text;
+                string CRD = (row.Cells[8].Controls[1] as TextBox).Text;
+                string PD = (row.Cells[9].Controls[1] as TextBox).Text;
+                string Country = (row.Cells[10].Controls[1] as TextBox).Text;
+                string Onhand = (row.Cells[11].Controls[1] as TextBox).Text;
+                //ClientScript.RegisterStartupScript(this.GetType(), "myalert", "alert('" + PO + "|" + Model_Name + Model_Number + "|" + Article + "|" + Quantity + "|" + Lean + "|" + Planned_Date + "|" + CRD + "|" + PD + "|" + Country + "|" + Onhand +"');", true);
+                using (sqlsconnection = new SqlConnection(sqls))
+                {
+                    if (!string.IsNullOrWhiteSpace(PO))
+                    {
+                        sqlsconnection.Open();
+                        inputdata = new DataTable();
+                        sqlscommand = new SqlCommand(" Update Schedule " +
+                            " Set PO = @PO, " +
+                            " Model_Name = @Model_Name, " +
+                            " Model_Number = @Model_Number, " +
+                            " Article = @Article, " +
+                            " Order_Quantity = @Quantity, " +
+                            " Building = @Lean, " +
+                            " Planned_Date = @Planned_Date, " +
+                            " CFD = @CRD, " +
+                            " PD = @PD, " +
+                            " Country = @Country, " +
+                            " Onhand = @Onhand " +
+                            " Where PO = @PO " +
+                            " IF @@ROWCOUNT = 0 " +
+                            " INSERT INTO [Schedule] (PO, Model_Name, Model_Number, Article, Order_Quantity, Building, Planned_Date, CFD, PD, Country, Onhand) " +
+                            " VALUES ( @PO, @Model_Name, @Model_Number, @Article, @Quantity, @Lean, @Planned_Date, @CRD, @PD, @Country, @Onhand ) ", sqlsconnection);
+                        sqlscommand.Parameters.AddWithValue("@PO", PO);
+                        sqlscommand.Parameters.AddWithValue("@Model_Name", Model_Name);
+                        sqlscommand.Parameters.AddWithValue("@Model_Number", Model_Number);
+                        sqlscommand.Parameters.AddWithValue("@Article", Article);
+                        sqlscommand.Parameters.AddWithValue("@Quantity", Quantity);
+                        sqlscommand.Parameters.AddWithValue("@Lean", Lean);
+                        sqlscommand.Parameters.AddWithValue("@Planned_Date", Planned_Date);
+                        sqlscommand.Parameters.AddWithValue("@CRD", CRD);
+                        sqlscommand.Parameters.AddWithValue("@PD", PD);
+                        sqlscommand.Parameters.AddWithValue("@Country", Country);
+                        sqlscommand.Parameters.AddWithValue("@Onhand", Onhand);
+                        sqlscommand.ExecuteNonQuery();
+                        sqlsconnection.Close();
+                        //ClientScript.RegisterStartupScript(this.GetType(), "myalert", "alert('" + ViewState["OldPO"] + "');", true);
+                        ClientScript.RegisterStartupScript(this.GetType(), "", ". . . PO was " + PO + " added successfully", false);
+                    }
+                    else
+                    {
+                        ClientScript.RegisterStartupScript(this.GetType(), "", ". . . No PO inputted", false);
+                    }
+                }
+
+
+                ResetCheckedViewState();
+                LoadSQL();
+            }
         }
     }
 }
